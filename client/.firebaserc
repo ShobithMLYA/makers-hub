@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "events-platform-9668b"
+  },
+  "targets": {
+    "events-platform-9668b": {
+      "hosting": {
+        "events": [
+          "events-platform-9668b"
+        ]
+      }
+    }
+  }
+}
