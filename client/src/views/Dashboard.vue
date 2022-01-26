@@ -230,7 +230,7 @@ export default Vue.extend({
 }
 
 .v-application a {
-  color: #fff !important;
+  /* color: #fff !important; */
 }
 
 .v-list .v-list-item {

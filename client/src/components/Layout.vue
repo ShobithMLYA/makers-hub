@@ -181,14 +181,14 @@ export default Vue.extend({
 }
 
 .theme--light.v-list-item--active:before {
-  opacity: 0 !important;
+  /* opacity: 0 !important; */
 }
 
-.v-list .v-list-item {
+/* .v-list .v-list-item {
   box-shadow: 0px 0px 10px !important;
   border-radius: 30px !important;
   margin: 18px 10px !important;
-}
+} */
 
 .v-sheet.v-toolbar {
   box-shadow: none !important;

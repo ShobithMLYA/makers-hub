@@ -5,17 +5,21 @@
       :items="speakers"
       sort-by="calories"
       class="elevation-1"
+      :search="search"
     >
-      <template v-slot:item.photo="{ item }">
+      <template v-slot:item.speaker_photo="{ item }">
         <div class="pa-2">
           <v-img
-            :src="item.photo"
-            :alt="item.name"
+            :src="require(`../uploads/speakers/${item.speaker_photo}`)"
+            :alt="item.speaker_name"
             height="50px"
             width="50px"
             class="event__poster"
           ></v-img>
         </div>
+      </template>
+      <template v-slot:item.linked_in="{ item }">
+        <a :href="item.linked_in" target="_blank">{{ item.linked_in }}</a>
       </template>
       <template v-slot:top>
         <v-toolbar flat>
@@ -55,7 +59,7 @@
                         prepend-icon="mdi-account"
                       ></v-text-field>
                     </v-col>
-                    <v-col cols="12" sm="6" md="6">
+                    <v-col cols="12" sm="6" md="6" v-if="!isEdit">
                       <template>
                         <v-file-input
                           v-model="speaker.speaker_photo"
@@ -94,7 +98,10 @@
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="primary" @click="close"> Cancel </v-btn>
-                <v-btn color="event" @click="addNewSpeaker">
+                <v-btn color="event" @click="updateSpeaker" v-if="isEdit">
+                  Update Speaker
+                </v-btn>
+                <v-btn color="event" @click="addNewSpeaker" v-else>
                   Add Speaker
                   <v-icon>mdi-plus-circle</v-icon>
                 </v-btn>
@@ -121,13 +128,13 @@
         </v-toolbar>
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-icon
+        <!-- <v-icon
           color="rgba(0, 0, 0, 0.87)"
           class="mr-2"
           @click="editItem(item)"
         >
           mdi-eye
-        </v-icon>
+        </v-icon> -->
         <v-icon
           color="rgba(0, 0, 0, 0.87)"
           class="mr-2"
@@ -135,7 +142,7 @@
         >
           mdi-pencil
         </v-icon>
-        <v-icon color="rgba(0, 0, 0, 0.87)" @click="deleteItem(item)">
+        <v-icon color="red" @click="deleteItem(item.speaker_id)">
           mdi-delete
         </v-icon>
       </template>
@@ -153,21 +160,25 @@ export default Vue.extend({
   name: "AllSpeakers",
   data() {
     return {
+      search: "",
       dialog: false,
       dialogDelete: false,
       headers: [
-        { text: "Photo", value: "photo", align: "start", sortable: false },
+        {
+          text: "Photo",
+          value: "speaker_photo",
+          align: "start",
+          sortable: false,
+        },
         {
           text: "Name",
           align: "start",
           sortable: true,
-          value: "name",
+          value: "speaker_name",
         },
-        { text: "Role", value: "designation" },
-        { text: "Organisation", value: "organization" },
-        { text: "Email", value: "email" },
-        { text: "Number", value: "mobile" },
-        { text: "LinkedIn", value: "linkedin" },
+        { text: "Role", value: "speaker_desg" },
+        { text: "Email", value: "speaker_email" },
+        { text: "LinkedIn", value: "linked_in" },
         { text: "Actions", value: "actions", sortable: false },
       ],
 
@@ -194,6 +205,7 @@ export default Vue.extend({
         carbs: 0,
         protein: 0,
       },
+      isEdit: false,
     };
   },
 
@@ -205,7 +217,7 @@ export default Vue.extend({
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "Add New Speaker" : "Edit Speaker";
+      return !this.isEdit ? "Add New Speaker" : "Update Speaker";
     },
     // ...mapState({ speakers: (state) => state.speaker.speakers }),
   },
@@ -222,22 +234,65 @@ export default Vue.extend({
   methods: {
     async getSpeakers() {
       try {
-        const response = await axios.get("https://localhost:3000/speakers");
-        this.speakers = response.data;
+        const response = await axios.get("http://localhost:3000/speakers");
+        this.speakers = response.data.data;
       } catch (error) {
         console.log(error);
       }
     },
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      console.log(item);
+      this.isEdit = true;
+      this.speaker = item;
       this.dialog = true;
     },
+    async updateSpeaker() {
+      try {
+        await axios.put(
+          `http://localhost:3000/speakers/${this.speaker.speaker_id}`,
+          this.speaker
+        );
+        this.$store.dispatch("showSnackbar", {
+          showing: true,
+          text: "Speaker updated successfully",
+          color: "success",
+        });
 
-    deleteItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialogDelete = true;
+        this.speaker = {
+          speaker_name: null,
+          speaker_desg: null,
+          speaker_email: null,
+          linked_in: null,
+          speaker_photo: null,
+        };
+
+        this.dialog = false;
+        this.isEdit = false;
+      } catch (error) {
+        this.$store.dispatch("showSnackbar", {
+          showing: true,
+          text: error.message,
+          color: "error",
+        });
+      }
+    },
+
+    async deleteItem(id) {
+      try {
+        await axios.delete(`http://localhost:3000/speakers/${id}`);
+        this.$store.dispatch("showSnackbar", {
+          showing: true,
+          text: "Speaker deleted successfully",
+          color: "success",
+        });
+        this.getSpeakers();
+      } catch (error) {
+        this.$store.dispatch("showSnackbar", {
+          showing: true,
+          text: error.message,
+          color: "error",
+        });
+      }
     },
 
     deleteItemConfirm() {

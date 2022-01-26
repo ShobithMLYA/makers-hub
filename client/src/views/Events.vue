@@ -55,7 +55,7 @@ export default Vue.extend({
 </script>
 <style>
 .v-sheet.v-card{
-    border-radius: 20px !important;
+    /* border-radius: 20px !important; */
 }
 
 thead .text-start{

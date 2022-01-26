@@ -35,12 +35,29 @@ router.post("/", uploadImage.single("speaker_photo"), (req, res) => {
   }
 });
 
-router.put("/", (req, res) => {
-  res.status(200).send("Login");
+router.put("/:id", (req, res) => {
+  try {
+    const speaker = req.body;
+    const sql = "UPDATE speakers SET ? WHERE speaker_id = ?";
+    con.query(sql, [speaker, req.params.id], (err, result) => {
+      if (err) throw err;
+      res.status(200).send({ message: "success", data: { ...result } });
+    });
+  } catch (error) {
+    res.status(500).send(error);
+  }
 });
 
 router.delete("/", (req, res) => {
-  res.status(200).send("Login");
+  try {
+    const sql = "DELETE FROM speakers WHERE speaker_id = ?";
+    con.query(sql, req.body.id, (err, result) => {
+      if (err) throw err;
+      res.status(200).send({ message: "success", data: { ...result } });
+    });
+  } catch (error) {
+    res.status(500).send(error);
+  }
 });
 
 module.exports = router;
