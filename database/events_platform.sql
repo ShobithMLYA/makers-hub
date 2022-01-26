@@ -2,10 +2,10 @@
 -- version 5.1.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Jan 25, 2022 at 05:32 PM
--- Server version: 10.4.22-MariaDB
--- PHP Version: 8.1.1
+-- Host: localhost:8889
+-- Generation Time: Jan 26, 2022 at 08:35 AM
+-- Server version: 5.7.34
+-- PHP Version: 7.4.21
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -31,12 +31,19 @@ CREATE TABLE `events` (
   `event_id` int(11) NOT NULL,
   `event_name` varchar(255) DEFAULT NULL,
   `event_type` varchar(255) DEFAULT NULL,
-  `event_date` date DEFAULT NULL,
+  `event_date` varchar(255) NOT NULL,
   `event_time` varchar(255) DEFAULT NULL,
   `speaker_id` int(11) DEFAULT NULL,
   `meeting_link` varchar(255) DEFAULT NULL,
   `description` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `events`
+--
+
+INSERT INTO `events` (`event_id`, `event_name`, `event_type`, `event_date`, `event_time`, `speaker_id`, `meeting_link`, `description`) VALUES
+(2, 'Test Event', 'Conference', '2022-01-27', '17:00', 1, 'https://meet.google.com/cfn-djya-fkd', 'Test event description');
 
 -- --------------------------------------------------------
 
@@ -48,8 +55,29 @@ CREATE TABLE `feedback` (
   `f_id` int(11) NOT NULL,
   `event_id` int(11) DEFAULT NULL,
   `p_id` int(11) DEFAULT NULL,
-  `rating` int(11) DEFAULT NULL
+  `rating` int(11) DEFAULT NULL,
+  `suggestions` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `feedback`
+--
+
+INSERT INTO `feedback` (`f_id`, `event_id`, `p_id`, `rating`, `suggestions`) VALUES
+(1, 2, 1, 4, 'Test feedback');
+
+--
+-- Triggers `feedback`
+--
+DELIMITER $$
+CREATE TRIGGER `check_feedback` BEFORE INSERT ON `feedback` FOR EACH ROW BEGIN
+        IF EXISTS(SELECT * FROM feedback WHERE p_id=NEW.p_id AND event_id=NEW.event_id)
+        THEN 
+            signal SQLSTATE '45000' SET message_text = "You have already submitted the feedback for this event";
+        END IF;
+    END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -88,6 +116,14 @@ CREATE TABLE `participants` (
   `linked_in` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `participants`
+--
+
+INSERT INTO `participants` (`p_id`, `event_id`, `p_name`, `p_email`, `p_mobile`, `linked_in`) VALUES
+(1, 2, 'Sujith', 'sujithsuji1098@gmail.com', '9876543210', 'https://www.linkedin.com/developers/apps/136009286/auth'),
+(2, 2, 'Shobith', 'shobith.mallya8@gmail.com', '7899496873', 'https://docs.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/share-on-linkedin?context=linkedin/consumer/context');
+
 -- --------------------------------------------------------
 
 --
@@ -108,7 +144,7 @@ CREATE TABLE `speakers` (
 --
 
 INSERT INTO `speakers` (`speaker_id`, `speaker_name`, `speaker_email`, `linked_in`, `speaker_desg`, `speaker_photo`) VALUES
-(1, 'GG', 'gg@gg.com', 'linkedin.com/gg', 'GG', 'speaker_photo_1642619251572.jpeg');
+(1, 'Vaishnavi', 'gg@gg.com', 'https://linkedin.com/gg', 'GG', 'speaker_photo_1642619251572.jpeg');
 
 --
 -- Indexes for dumped tables
@@ -156,13 +192,13 @@ ALTER TABLE `speakers`
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `feedback`
 --
 ALTER TABLE `feedback`
-  MODIFY `f_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `f_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `organisations`
@@ -174,7 +210,7 @@ ALTER TABLE `organisations`
 -- AUTO_INCREMENT for table `participants`
 --
 ALTER TABLE `participants`
-  MODIFY `p_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `p_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `speakers`

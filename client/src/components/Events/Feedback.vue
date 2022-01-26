@@ -50,7 +50,20 @@ export default Vue.extend({
         this.feedback.event_id = this.$route.params.eId;
         this.feedback.p_id = this.$route.params.pId;
 
-        await axios.post("http://localhost:3000/feedback", this.feedback);
+        const response = await axios.post(
+          "http://localhost:3000/feedback",
+          this.feedback
+        );
+
+        if (response.data.status === 409) {
+          this.$store.dispatch("showSnackbar", {
+            showing: true,
+            text: response.data.message,
+            color: "warning",
+          });
+          return
+        }
+
         this.$store.dispatch("showSnackbar", {
           showing: true,
           text: "Feedback submitted successfully",
@@ -62,10 +75,11 @@ export default Vue.extend({
           suggestions: "",
         };
 
-        setTimeout(() => {
-          window.close();
-        }, 2000);
+        // setTimeout(() => {
+        //   window.close();
+        // }, 2000);
       } catch (error) {
+        console.log(error);
         this.$store.dispatch("showSnackbar", {
           showing: true,
           text: error,
