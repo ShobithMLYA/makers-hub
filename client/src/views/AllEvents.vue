@@ -98,19 +98,12 @@
         </v-toolbar>
       </template>
       <template v-slot:item.responses="{ item }">
-        <v-btn color="event" @click="showResponses(item.docId)">View</v-btn>
+        <v-btn color="event" @click="showResponses(item.event_id)">View</v-btn>
       </template>
-      <template v-slot:item.feedback>
-        <v-btn color="event">View</v-btn>
+      <template v-slot:item.feedback="{ item }">
+        <v-btn color="event" @click="showFeedbacks(item.event_id)">View</v-btn>
       </template>
-      <template v-slot:item.actions>
-        <v-icon
-          color="rgba(0, 0, 0, 0.87)"
-          class="mr-2"
-          @click="editItem(item)"
-        >
-          mdi-eye
-        </v-icon>
+      <template v-slot:item.actions="{ item }">
         <v-icon
           color="rgba(0, 0, 0, 0.87)"
           class="mr-2"
@@ -121,37 +114,37 @@
         <v-icon
           color="rgba(0, 0, 0, 0.87)"
           class="mr-2"
-          @click="deleteItem(item)"
+          @click="copyToClipboard(item.event_id)"
         >
           mdi-clipboard
         </v-icon>
-        <v-icon color="rgba(0, 0, 0, 0.87)" @click="deleteItem(item)">
+        <v-icon
+          color="#3aa959"
+          class="mr-2"
+          @click="sendFeedbackMail(item.event_id)"
+        >
+          mdi-send-check
+        </v-icon>
+        <v-icon color="red" @click="deleteItem(item.event_id)">
           mdi-delete
         </v-icon>
-
-        <!-- <v-icon
-      color="event"
-        class="mr-2"
-        @click="editItem(item)"
-      >
-        mdi-eye
-      </v-icon>
-      <v-icon
-      color="primary"
-        class="mr-2"
-        @click="editItem(item)"
-      >
-        mdi-pencil
-      </v-icon>
-      <v-icon
-      color="red"
-        @click="deleteItem(item)"
-      >
-        mdi-delete
-      </v-icon> -->
       </template>
     </v-data-table>
-    <EventResponses />
+    <event-responses
+      :visible="eventResponseDialog"
+      :responses="responses"
+      @close="eventResponseDialog = false"
+    ></event-responses>
+    <event-feedbacks
+      :feedbacks="feedbacks"
+      :visible="eventFeedbackDialog"
+      @close="eventFeedbackDialog = false"
+    ></event-feedbacks>
+    <edit-event
+      :event="event"
+      :visible="editEventDialog"
+      @close="editEventDialog = false"
+    ></edit-event>
   </v-container>
 </template>
 
@@ -159,23 +152,24 @@
 import Vue from "vue";
 import EventResponses from "@/components/Events/EventResponses";
 import axios from "axios";
+import EditEvent from "../components/Events/EditEvent.vue";
+import copy from "copy-to-clipboard";
+import sendMail from "../mixins/send-email";
+import EventFeedbacks from "../components/Events/EventFeedbacks.vue";
+
 export default Vue.extend({
   name: "AllEvents",
   components: {
     EventResponses,
+    EditEvent,
+    EventFeedbacks,
   },
+  mixins: [sendMail],
   data: () => ({
     search: null,
     dialog: false,
     dialogDelete: false,
     headers: [
-      // { text: 'Posters', value: 'image', align: 'start', sortable: false },
-      // {
-      //   text: 'Type',
-      //   align: 'start',
-      //   sortable: false,
-      //   value: 'type',
-      // },
       { text: "Event", value: "event_name", sortable: false },
       { text: "Speaker", value: "speaker_name" },
       { text: "Date", value: "event_date" },
@@ -185,6 +179,7 @@ export default Vue.extend({
       { text: "Actions", value: "actions", sortable: false },
     ],
     events: [],
+    event: {},
     editedIndex: -1,
     editedItem: {
       name: "",
@@ -200,6 +195,12 @@ export default Vue.extend({
       carbs: 0,
       protein: 0,
     },
+    editEventDialog: false,
+    eventId: null,
+    responses: [],
+    eventResponseDialog: false,
+    eventFeedbackDialog: false,
+    feedbacks: [],
   }),
 
   computed: {
@@ -222,25 +223,44 @@ export default Vue.extend({
   },
 
   methods: {
+    copyToClipboard(id) {
+      const url = `${window.location.origin}/event/register/${id}`;
+      copy(url);
+      this.$store.dispatch("showSnackbar", {
+        showing: true,
+        text: "Copied to clipboard",
+        color: "success",
+      });
+    },
     async getEvents() {
       try {
         const response = await axios.get("http://localhost:3000/events");
         this.events = response.data.data;
-        console.log(this.events);
       } catch (error) {
         console.log(error);
       }
     },
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialog = true;
+      this.event = item;
+      this.editEventDialog = true;
     },
 
-    deleteItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialogDelete = true;
+    async deleteItem(id) {
+      try {
+        await axios.delete(`http://localhost:3000/events/${id}`);
+        this.getEvents();
+        this.$store.dispatch("showSnackbar", {
+          showing: true,
+          text: "Event Deleted",
+          color: "success",
+        });
+      } catch (error) {
+        this.$store.dispatch("showSnackbar", {
+          showing: true,
+          text: error,
+          color: "error",
+        });
+      }
     },
 
     deleteItemConfirm() {
@@ -273,11 +293,56 @@ export default Vue.extend({
       this.close();
     },
 
-    showResponses(eventId) {
-      this.$store.dispatch("showResponses", {
-        isShowing: true,
-        eventId: eventId,
-      });
+    async showResponses(eventId) {
+      this.eventId = eventId;
+      await this.getResponses();
+      this.eventResponseDialog = true;
+    },
+
+    async showFeedbacks(eventId) {
+      this.eventId = eventId;
+      await this.getFeedbacks();
+      this.eventFeedbackDialog = true;
+    },
+
+    async sendFeedbackMail(event_id) {
+      this.eventId = event_id;
+      let counter = 0;
+      this.getResponses();
+      for (const participant of this.responses) {
+        await this.sendMail(participant);
+        counter++;
+
+        if (counter === this.responses.length) {
+          this.$store.dispatch("showSnackbar", {
+            showing: true,
+            text: "Feedback sent",
+            color: "success",
+          });
+        }
+      }
+    },
+
+    async getFeedbacks() {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/events/${this.eventId}/feedbacks`
+        );
+        this.feedbacks = response.data.data;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    async getResponses() {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/events/${this.eventId}/responses`
+        );
+        this.responses = response.data.data;
+      } catch (error) {
+        console.log(error);
+      }
     },
   },
 });

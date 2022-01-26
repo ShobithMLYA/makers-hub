@@ -1,21 +1,22 @@
 <template>
   <div>
-    <v-app-bar app color="white">
+    <v-app-bar
+      app
+      color="white"
+      v-if="$route.name !== 'EventRegister' && $route.name !== 'EventFeedback'"
+    >
       <v-app-bar-nav-icon
         @click.stop="sidebarMenu = !sidebarMenu"
         color="event"
       ></v-app-bar-nav-icon>
       <v-spacer></v-spacer>
-      <div class="text-center">
-        <h3>{{ currentUser.displayName }} - {{ title }}</h3>
-      </div>
 
       <v-spacer></v-spacer>
 
       <!-- <v-menu
         offset-y
       > -->
-        <!-- <template v-slot:activator="{ attrs, on }">
+      <!-- <template v-slot:activator="{ attrs, on }">
           <v-btn
             class="ml-5"
             color="black"
@@ -29,7 +30,7 @@
         </v-btn>
         </template> -->
 
-        <!-- <v-list>
+      <!-- <v-list>
           <v-list-item>
             <v-list-item-title link>
               <h1>Notification1</h1>
@@ -43,11 +44,9 @@
           </v-list-item>
         </v-list>
       </v-menu> -->
-      <v-icon
-        @click="logout()"
-        class="mr-5 ml-5"
-        color="black"
-      >mdi-logout</v-icon>
+      <v-icon @click="logout()" class="mr-5 ml-5" color="black"
+        >mdi-logout</v-icon
+      >
     </v-app-bar>
     <v-navigation-drawer
       v-model="sidebarMenu"
@@ -55,6 +54,7 @@
       floating
       :permanent="sidebarMenu"
       :mini-variant.sync="mini"
+      v-if="$route.name !== 'EventRegister' && $route.name !== 'EventFeedback'"
     >
       <v-list dense color="white" dark>
         <v-list-item>
@@ -66,10 +66,12 @@
           <v-list-item-content>
             <v-list-item-title>
               <img
-                :src="require(`../uploads/organisation/${currentUser.photoURL}`)"
+                :src="
+                  require(`../uploads/organisation/${currentUser.photoURL}`)
+                "
                 :alt="currentUser.displayName"
                 width="175px"
-              >
+              />
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
@@ -104,23 +106,20 @@
         </v-list-item>
       </v-list>
 
-      <div class="pa-2 text-center">
-        <h4 class="text--secondary" style="font-size: 12px !important;">Powered by</h4>
-        <a href="https://thestartupreneur.co/#page1" target="_blank">
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/6/6c/MA_Standard_-_Color.png"
-            alt="The Startupreneur"
-            width="200"
-          />
-        </a>
-      </div>
-      <!-- <template v-slot:append>
-        <div class="pa-2">
-          <v-btn @click="toggleTheme" color="event" class="mr-2" block>{{
-            buttonText
-          }}</v-btn>
+      <template v-slot:append>
+        <div class="pa-2 text-center">
+          <h4 class="text--secondary" style="font-size: 12px !important">
+            Powered by
+          </h4>
+          <a href="https://thestartupreneur.co/#page1" target="_blank">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/6/6c/MA_Standard_-_Color.png"
+              alt="The Startupreneur"
+              width="200"
+            />
+          </a>
         </div>
-      </template> -->
+      </template>
     </v-navigation-drawer>
   </div>
 </template>
@@ -156,11 +155,11 @@ export default Vue.extend({
       //   icon: "mdi-teach",
       // },
       // { title: "Community", href: "/community", icon: "mdi-account-multiple" },
-      {
-        title: "Participants",
-        href: "/participants",
-        icon: "mdi-account-group-outline",
-      },
+      // {
+      //   title: "Participants",
+      //   href: "/participants",
+      //   icon: "mdi-account-group-outline",
+      // },
     ],
   }),
   methods: {
@@ -176,7 +175,6 @@ export default Vue.extend({
 
 <style>
 .v-application a {
-  color: #000 !important;
   text-decoration: none !important;
 }
 

@@ -69,7 +69,7 @@ const routes: Array<RouteConfig> = [
     component: () => import(/* webpackChunkName: "register" */ '../views/EventRegister.vue')
   },
   {
-    path: '/event/feedback/:id',
+    path: '/event/feedback/:eId/participant/:pId',
     name: 'EventFeedback',
     component: () => import(/* webpackChunkName: "feedback" */ '../views/EventFeedback.vue')
   },

@@ -13,12 +13,14 @@ const speakersRoute = require('./routes/speakers');
 const eventsRoute = require('./routes/events');
 const participantsRoute = require('./routes/participants');
 const feedbackRoute = require('./routes/feedback');
+const statsRoute = require('./routes/stats');
 
 app.use('/organisations', organisationsRoute);
 app.use('/speakers', speakersRoute);
 app.use('/participants', participantsRoute);
 app.use('/events', eventsRoute);
 app.use('/feedback', feedbackRoute);
+app.use('/stats', statsRoute);
 
 app.listen(PORT, () => {
     console.log('Server is running on port 3000');

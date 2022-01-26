@@ -1,10 +1,5 @@
 <template>
   <v-container>
-    <v-toolbar flat>
-      <!-- <v-toolbar-title>Create New Event</v-toolbar-title> -->
-      <v-spacer></v-spacer>
-    </v-toolbar>
-    <!-- <v-card class="mx-auto pa-5" elevation=""> -->
     <v-form>
       <v-row>
         <v-col cols="12" md="12">
@@ -36,37 +31,6 @@
           ></v-textarea>
         </v-col>
       </v-row>
-      <!-- <v-row>
-        <v-col cols="2" md="2">
-          <v-img
-            :src="speaker.photo"
-            style="border-radius: 50%; width: 60px; height: 60px"
-          ></v-img>
-        </v-col>
-        <v-col cols="4" md="4">
-          <v-text-field
-            label="Speaker Name"
-            outlined
-            v-model="speaker.name"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="4" md="4">
-          <v-text-field
-            label="Speaker Designation"
-            outlined
-            v-model="speaker.designation"
-          ></v-text-field>
-        </v-col>
-        <v-col>
-          <v-icon
-            color="error"
-            size="48"
-            style="cursor: pointer"
-            @click="deleteSpeaker(index)"
-            >mdi-delete</v-icon
-          >
-        </v-col>
-      </v-row> -->
       <v-row>
         <v-col cols="12" md="12" v-show="showSelectSpeaker">
           <v-select
@@ -81,17 +45,6 @@
           ></v-select>
         </v-col>
       </v-row>
-      <!-- <v-row>
-        <v-col>
-          <v-btn
-            color="event"
-            class="mb-3"
-            @click="showSpeakerDropdown"
-            v-show="!showSelectSpeaker"
-            ><v-icon>mdi-plus-circle</v-icon>Add New Speaker</v-btn
-          >
-        </v-col>
-      </v-row> -->
       <v-row>
         <v-col cols="6" md="6">
           <v-dialog
@@ -103,7 +56,7 @@
           >
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
-                v-model="dateFormatted"
+                v-model="date"
                 label="Select Date"
                 prepend-icon="mdi-calendar"
                 readonly
@@ -258,12 +211,11 @@ export default Vue.extend({
     title: null,
     description: null,
     date: new Date().toISOString().substr(0, 10),
-    dateFormatted: vm.formatDate(new Date().toISOString().substr(0, 10)),
+    types: ["Webinar", "Conference", "Seminar", "Workshop", "Masterclass"],
     time: null,
     speakerText: null,
     selected: null,
     selectedSpeakers: [],
-    types: ["Webinar", "Conference", "Seminar", "Workshop", "Masterclass"],
     modal: false,
     modal2: false,
     checkbox: false,
@@ -290,17 +242,6 @@ export default Vue.extend({
     },
     speakers: [],
   }),
-  computed: {
-    computedDateFormatted() {
-      return this.formatDate(this.date);
-    },
-  },
-
-  watch: {
-    date(val) {
-      this.dateFormatted = this.formatDate(this.date);
-    },
-  },
   created() {
     this.getSpeakers();
   },
@@ -312,18 +253,6 @@ export default Vue.extend({
       } catch (error) {
         console.log(error);
       }
-    },
-    formatDate(date) {
-      if (!date) return null;
-
-      const [year, month, day] = date.split("-");
-      return `${day}/${month}/${year}`;
-    },
-    parseDate(date) {
-      if (!date) return null;
-
-      const [day, month, year] = date.split("/");
-      return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
     },
     displaySpeaker() {
       if (this.speakerText !== null) this.speakerText += this.selected + ",";
@@ -338,7 +267,7 @@ export default Vue.extend({
       this.$store.dispatch("showLoader", { isLoading: true });
 
       try {
-        this.event.event_date = this.dateFormatted;
+        this.event.event_date = this.date;
         this.event.event_time = this.time;
 
         await axios.post("http://localhost:3000/events", this.event);
@@ -348,8 +277,17 @@ export default Vue.extend({
           color: "event",
         });
         this.$store.dispatch("showLoader", { isLoading: false });
+        this.event = {
+          event_name: null,
+          event_type: null,
+          event_date: null,
+          event_time: null,
+          speaker_id: null,
+          meeting_link: null,
+          description: null,
+        };
       } catch (error) {
-      this.$store.dispatch("showLoader", { isLoading: false });
+        this.$store.dispatch("showLoader", { isLoading: false });
         this.$store.dispatch("showSnackbar", {
           showing: true,
           text: "Event Creation Failed",

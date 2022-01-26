@@ -2,7 +2,7 @@
   <v-dialog v-model="show" max-width="700" persistent>
     <v-card>
       <v-card-title>
-        All Registrations
+        All Feedbacks
         <v-spacer></v-spacer>
         <v-text-field
           v-model="search"
@@ -12,12 +12,7 @@
           hide-details
         ></v-text-field>
       </v-card-title>
-      <v-data-table :headers="headers" :items="responses" :search="search">
-        <template v-slot:item.linked_in="{ item }">
-          <a :href="item.linked_in" target="_blank">
-            view
-          </a>
-        </template>
+      <v-data-table :headers="headers" :items="feedbacks" :search="search">
       </v-data-table>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -29,8 +24,8 @@
 
 <script>
 export default {
-  name: "EventResponses",
-  props: ["visible", "responses"],
+  name: "EventFeedbacks",
+  props: ["visible", "feedbacks"],
   computed: {
     show: {
       get() {
@@ -53,9 +48,8 @@ export default {
           sortable: true,
           value: "p_name",
         },
-        { text: "Email Address", value: "p_email" },
-        { text: "Mobile Number", value: "p_mobile" },
-        { text: "Linked In", value: "linked_in" },
+        { text: "Rating(5)", value: "rating" },
+        { text: "Suggestions", value: "suggestions" },
       ],
     };
   },
