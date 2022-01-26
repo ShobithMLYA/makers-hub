@@ -1,17 +1,15 @@
-import firebase from "firebase";
 import router from "@/router";
 import axios from "axios";
 
 export default {
   state: {
     isLoggedIn: false,
-    currentUser: {},
+    currentUser: null,
   },
   mutations: {
     setUser(state: any, payload: any) {
       state.currentUser = payload;
       localStorage.setItem("currentUser", payload);
-      localStorage.setItem("userId", payload.uid);
     },
     setLoggedIn(state: any, payload: boolean) {
       state.isLoggedIn = payload;
@@ -29,11 +27,11 @@ export default {
             org_password: payload.password
           }
         );
-        
+
         const data = response.data.data
-        
+
         // console.log(data)
-        
+
         const userDetails = {
           uid: data.org_id,
           displayName: data.org_name,
@@ -55,16 +53,20 @@ export default {
         commit("setLoader", { isLoading: false });
       }
     },
+    setUser({ commit }: any, payload: any) {
+      commit("setUser", payload);
+    },
 
     logout({ commit }: any) {
       commit("setLoader", { isLoading: true });
-      firebase.auth().signOut();
-      commit("setUser", {});
+      commit("setUser", null);
       commit("setLoggedIn", false);
-      localStorage.setItem("currentUser", "");
-      localStorage.setItem("userId", "");
+      localStorage.setItem("userDetails", null);
       router.push("/");
       commit("setLoader", { isLoading: false });
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     },
   },
 };

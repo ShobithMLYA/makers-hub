@@ -34,7 +34,6 @@
 
 <script>
 import Vue from "vue";
-import firebase from "firebase";
 import axios from "axios";
 
 export default Vue.extend({

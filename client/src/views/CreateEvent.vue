@@ -175,37 +175,16 @@
         </v-card>
       </v-dialog>
     </v-row>
-    <v-row justify="center">
-      <v-dialog v-model="shareEventModal" max-width="700" persistent>
-        <v-card>
-          <v-card-title class="headline"> Share the event </v-card-title>
-          <v-card-text align="left">
-            <ShareEvent />
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="red darken-1" text @click="shareEventModal = false">
-              Cancel
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </v-row>
   </v-container>
 </template>
 
 <script>
 import Vue from "vue";
-import firebase from "firebase";
 import axios from "axios";
 import copy from "copy-to-clipboard";
-import ShareEvent from "@/components/Events/ShareEvent";
 
 export default Vue.extend({
   name: "CreateEvent",
-  components: {
-    ShareEvent,
-  },
   data: (vm) => ({
     type: null,
     title: null,

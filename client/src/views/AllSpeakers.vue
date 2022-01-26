@@ -153,8 +153,6 @@
 <script>
 import axios from "axios";
 import Vue from "vue";
-import { shortUser, userId } from "../services/short_user";
-import firebase from "firebase";
 
 export default Vue.extend({
   name: "AllSpeakers",

@@ -1,3 +1,4 @@
+import store from '@/store'
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import Home from '../views/Home.vue'
@@ -24,16 +25,6 @@ const routes: Array<RouteConfig> = [
     component: () => import(/* webpackChunkName: "events" */ '../views/Events.vue')
   },
   {
-    path: '/request',
-    name: 'RequestSpeaker',
-    component: () => import(/* webpackChunkName: "request" */ '../views/RequestSpeaker.vue')
-  },
-  {
-    path: '/availability',
-    name: 'SpeakerAvailability',
-    component: () => import(/* webpackChunkName: "speaker-availability" */ '../views/SpeakerAvailability.vue')
-  },
-  {
     path: '/speakers',
     name: 'Speakers',
     component: () => import(/* webpackChunkName: "speakers" */ '../views/Speakers.vue')
@@ -42,26 +33,6 @@ const routes: Array<RouteConfig> = [
     path: '/create',
     name: 'CreateEvent',
     component: () => import(/* webpackChunkName: "create-event" */ '../views/CreateEvent.vue')
-  },
-  {
-    path: '/activities',
-    name: 'Activities',
-    component: () => import(/* webpackChunkName: "activities" */ '../views/Activities.vue')
-  },
-  {
-    path: '/participants',
-    name: 'Participants',
-    component: () => import(/* webpackChunkName: "participants" */ '../views/Participants.vue')
-  },
-  // {
-  //   path: '/community/:id',
-  //   name: 'Community',
-  //   component: () => import(/* webpackChunkName: "community" */ '../views/Community.vue')
-  // },
-  {
-    path: '/speaker/request/:id',
-    name: 'UpdateAvailability',
-    component: () => import(/* webpackChunkName: "update-availability" */ '../views/UpdateAvailability.vue')
   },
   {
     path: '/event/register/:id',
@@ -84,6 +55,15 @@ const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  const user = localStorage.getItem("userDetails");
+  store.dispatch("setUser", JSON.parse(user));
+  if (to.name !== 'Home' && !user) {
+    next('Home');
+  } else
+    next();
 })
 
 export default router

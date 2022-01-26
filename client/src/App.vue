@@ -1,8 +1,8 @@
 <template>
   <v-app>
-    <Layout v-if="Object.keys(currentUser).length !== 0" :title="title" />
+    <Layout v-if="currentUser !== null && typeof currentUser === 'object'" :title="title" />
     <v-main>
-      <v-row class="fill-height">
+      <v-row class="fill-height mx-1">
         <v-col>
           <transition name="fade">
             <router-view></router-view>
@@ -38,30 +38,6 @@ export default Vue.extend({
       { currentUser: (state) => state.user.currentUser },
       { isLoggedIn: (state) => state.user.isLoggedIn }
     ),
-  },
-  created() {
-    // const location = window.location.href;
-    // this.title =
-    //   location.split("/")[3].charAt(0).toUpperCase() +
-    //   location.split("/")[3].substring(1);
-
-    this.$store.commit("setLoader", { isLoading: true });
-    const userDetails = JSON.parse(localStorage.getItem("userDetails"));
-
-    if (userDetails) {
-      this.$store.commit("setUser", userDetails);
-      this.$store.commit("setLoggedIn", true);
-      this.$store.commit("setLoader", { isLoading: false });
-      // this.$store.dispatch("getSpeakers", {
-      //   userId: userDetails.org_id,
-      // });
-    } else {
-      console.log("logged out");
-        this.$store.commit("setUser", {});
-        this.$store.commit("setLoggedIn", false);
-        this.$store.commit("setLoader", { isLoading: false });
-    }
-    this.$store.commit("setLoader", { isLoading: false });
   },
 });
 </script>
